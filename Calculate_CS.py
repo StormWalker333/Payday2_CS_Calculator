@@ -16,7 +16,7 @@ def Calculate_Players_Boosted_CS(host_cs_lvl:int|None=None,player_cs_lvl:int|Non
     # Inserts commas every third placement on the left strarting from the decimal point
     formatted_int:str= lambda result_format_request: (format(result_format_request,',d'))
 
-    results:int= round((host_cs_lvl-player_cs_lvl)*(3.5+float(f'0.0{cs_mission}'))/100)
+    results:int= round((host_cs_lvl-player_cs_lvl)*(3.5+float(f'0.0{cs_mission}'))/100) if host_cs_lvl>player_cs_lvl else player_cs_lvl
     formatted_result:str= formatted_int(results)
 
     host_cs_lvl:int= host_cs_lvl+cs_mission
