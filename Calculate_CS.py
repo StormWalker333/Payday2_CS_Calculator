@@ -1,7 +1,7 @@
 """A Simple Python calculator, to calculate a host's cs & a player's boosted level in Payday 2"""
 
 def main():
-    def Find_CS_Mission(string_value:str)-> int|None:
+    def find_cs_mission(string_value:str)-> int|None:
         cs_map_rotation:dict= {
                 "airport": 4,
                 "swing vote": 4,
@@ -61,33 +61,41 @@ def main():
                 break
 
         return cs_map_rotation[found_key] if found_key is not None else None
-    def Calculate_Players_Boosted_CS(host_cs_lvl:int|None=None,player_cs_lvl:int|None=None,cs_mission:int|None=None):
-        if host_cs_lvl is None: host_cs_lvl:int= int(input("What is the host's level Crime Spree?\n> ").strip().replace(",",""))
-        if player_cs_lvl is None: player_cs_lvl:int= int(input("What is the player's level Crime Spree?\n> ").strip().replace(",",""))
+    def calculate_players_boosted_cs(host_cs_lvl:int|None=None,player_cs_lvl:int|None=None,cs_mission:int|None=None):
+        if host_cs_lvl is None:
+            host_cs_lvl:int= int(input("What is the host's level Crime Spree?\n> ").strip().replace(",",""))
+        if player_cs_lvl is None:
+            player_cs_lvl:int= int(input("What is the player's level Crime Spree?\n> ").strip().replace(",",""))
         if cs_mission is None:
             while True:
-                input_mission:str= str(input("What is the upcoming mission?\n> ")).strip().replace(",","")
-                try:
+                input_mission:str= str(
+                        input("What is the upcoming mission?\n> ")
+                    ).strip().replace('_','').replace(",","").replace('+','')
+
+                try:# Attempt to force str to int
                     cs_mission:int= int(input_mission)
-                except Exception:
-                    potential_find:int|None= Find_CS_Mission(input_mission)
+                    break
+                except ValueError:# Failed to force str to int, try again until successful
+                    potential_find:int|None= find_cs_mission(input_mission)
                     if potential_find is None:
                         print(f"Failed to find {input_mission}! Please try again...")
                         continue
-                    else:
-                        cs_mission=potential_find
-                        break
-                        
-        
-        if host_cs_lvl<0: host_cs_lvl=0
-        if player_cs_lvl<0: player_cs_lvl=0
-        if cs_mission<3: cs_mission=3
-        elif cs_mission>15: cs_mission=15
+                    cs_mission=potential_find
+                    break
+
+        host_cs_lvl= host_cs_lvl if isinstance(host_cs_lvl,int) and host_cs_lvl>=0 else 0
+        player_cs_lvl= player_cs_lvl if isinstance(player_cs_lvl,int) and player_cs_lvl>=0 else 0
+        cs_mission= cs_mission if isinstance(cs_mission,int) and 3<=cs_mission \
+            else 3 if cs_mission<=15 else 15
+        #cs_mission= cs_mission if isinstance(cs_mission,int) and 15>=cs_mission else 15
 
         # Inserts commas every third placement on the left strarting from the decimal point
         formatted_int:str= lambda result_format_request: (format(result_format_request,',d'))
 
-        results:int= round((host_cs_lvl-player_cs_lvl)*(3.5+float(f'0.0{cs_mission}'))/100) if host_cs_lvl>player_cs_lvl else player_cs_lvl
+        results:int= round(# Formula value to calculate cs boost
+                (host_cs_lvl-player_cs_lvl)*(3.5+float(f'0.0{cs_mission}'))/100
+            ) if host_cs_lvl>player_cs_lvl else player_cs_lvl \
+                if host_cs_lvl!=player_cs_lvl else player_cs_lvl+cs_mission
         formatted_result:str= formatted_int(results)
 
         host_cs_lvl:int= host_cs_lvl+cs_mission
@@ -108,13 +116,13 @@ def main():
 
         return True if q2=='y' else False
 
-    placeholder:dict=Calculate_Players_Boosted_CS()
+    placeholder:dict=calculate_players_boosted_cs()
     print()
 
     while True:
         results=placeholder
         match run_again():
-            case True: placeholder=Calculate_Players_Boosted_CS(host_cs_lvl=results.get('host lvl',None))
-            case False: placeholder=Calculate_Players_Boosted_CS()
+            case True: placeholder=calculate_players_boosted_cs(host_cs_lvl=results.get('host lvl',None))
+            case False: placeholder=calculate_players_boosted_cs()
         print()
 main()
