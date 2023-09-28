@@ -3,6 +3,7 @@
 def main():
     def find_cs_mission(string_value:str)-> int|None:
         cs_map_rotation:dict= {
+                "interception": 3,
                 "airport": 4,
                 "swing vote": 4,
                 "the revenge": 4,
@@ -47,9 +48,7 @@ def main():
                 "cook off": 13,
                 "the big bank": 13,
                 "engine problem": 14,
-                "the search": 15,
-
-                "interception": 0
+                "the search": 15
             }
         map_name:str= " ".join(string_value.strip().lower().replace('the ','').split())
         map_rotation_keys:list= cs_map_rotation.keys()
