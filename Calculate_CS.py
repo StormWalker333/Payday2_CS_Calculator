@@ -1,6 +1,40 @@
 """A Simple Python calculator, to calculate a host's cs & a player's boosted level in Payday 2"""
 
-def main():
+# Client 100 rank, host 90 rank, completes +8 heist. Client's 100 > host's 98, so there is a reduction of 100 - 98 = 2. Client's new rank is 100 + 8 - 2 = 106.
+class quickplay_filter:
+    def map_search(aliased_name:str)->str:
+        known_maps:dict= {# XBOX ONLY
+            # BAIN
+            "gallery":"art gallery",
+            "branchbank":"bank heist", # CS ONLY RESULT
+            "branchbank_deposit":"bank heist: deposit",
+            "branchbank_cash":"bank hest: cash",
+            "branchbank_prof":"bank hest: random",
+            "branchbank_gold_prof":"bank hest: gold",
+            "cage":"car shop",
+            "rat":"cook off",
+            "family":"diamond store",
+            "jewelrey_store":"jewelry store",
+            "rvd":"reservoir dogs",
+            "kosugi":"shadow raid",
+            "arena":"the alesso heist",
+            "arm_cro":"transport: crossroads",
+            "arm_hcm":"transport: downtown",
+            "arm_fac":"transport: harbor",
+            "arm_park":"transport: park",
+            "arm_und":"transport: underpass",
+            "arm_for":"transport: train",
+        }
+def cs_cost(level:int, failed:bool=False)-> int:
+    # RANK * 0.5 Continental Coins
+    # 0 * 0.5 = 0
+    # 20 * 0.5 = 10
+    # 40 * 0.5 = 20
+    # MAX * 0.5 = HALF OF MAX
+    new_cs_run:int= int(level * 0.5)
+    return new_cs_run if failed is False else failed
+def catchup_bonus():
+    """ """
     def find_cs_mission(string_value:str)-> int|None:
         cs_map_rotation:dict= {
                 "interception": 3,
@@ -61,6 +95,7 @@ def main():
 
         return cs_map_rotation[found_key] if found_key is not None else None
     def calculate_players_boosted_cs(host_cs_lvl:int|None=None,player_cs_lvl:int|None=None,cs_mission:int|None=None):
+        """ """
         if host_cs_lvl is None:
             host_cs_lvl:int= int(input("What is the host's level Crime Spree?\n> ").strip().replace(",",""))
         if player_cs_lvl is None:
@@ -92,9 +127,11 @@ def main():
         formatted_int:str= lambda result_format_request: (format(result_format_request,',d'))
 
         results:int= round(# Formula value to calculate cs boost
-                (host_cs_lvl-player_cs_lvl)*(3.5+float(f'0.0{cs_mission}'))/100
-            ) if host_cs_lvl>player_cs_lvl else player_cs_lvl \
-                if host_cs_lvl!=player_cs_lvl else player_cs_lvl+cs_mission
+                player_cs_lvl+int(((host_cs_lvl+cs_mission)-player_cs_lvl)*0.035)
+            )+cs_mission if host_cs_lvl>player_cs_lvl \
+                else player_cs_lvl+cs_mission-(player_cs_lvl-host_cs_lvl) \
+                    if host_cs_lvl!=player_cs_lvl \
+                    else player_cs_lvl+cs_mission
         formatted_result:str= formatted_int(results)
 
         host_cs_lvl:int= host_cs_lvl+cs_mission
@@ -124,4 +161,8 @@ def main():
             case True: placeholder=calculate_players_boosted_cs(host_cs_lvl=results.get('host lvl',None))
             case False: placeholder=calculate_players_boosted_cs()
         print()
-main()
+try:
+    catchup_bonus()
+except KeyboardInterrupt: # NOQA:W30133
+    # Cleanly closes the script when keyboard interupt is called rather than error
+    SystemExit(0) # CLOSED SUCCESSFULY!
